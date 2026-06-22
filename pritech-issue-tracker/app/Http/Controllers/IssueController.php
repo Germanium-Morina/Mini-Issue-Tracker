@@ -48,7 +48,7 @@ class IssueController extends Controller
      */
     public function show(Issue $issue)
     {
-        $issue->load(['project', 'tags', 'comments']);
+        $issue->load(['project', 'tags']);
         return view('issues.show', compact('issue'));
     }
 

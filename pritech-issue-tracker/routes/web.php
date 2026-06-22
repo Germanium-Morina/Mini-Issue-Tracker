@@ -13,8 +13,8 @@ Route::resource('issues', IssueController::class);
 Route::resource('tags', TagController::class)->only(['index', 'store']);
 
 
-Route::post('issues/{issue}/tags/{tag}/attach', [IssueController::class, 'attachTag']);
-Route::delete('issues/{issue}/tags/{tag}/detach', [IssueController::class, 'detachTag']);
+Route::post('issues/{issue}/tags/{tag}/attach', [IssueController::class, 'attachTag'])->name('issues.tags.attach');
+Route::delete('issues/{issue}/tags/{tag}/detach', [IssueController::class, 'detachTag'])->name('issues.tags.detach');
 
 
 Route::get('issues/{issue}/comments', [CommentController::class, 'index']);
