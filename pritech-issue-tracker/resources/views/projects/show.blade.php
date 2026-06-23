@@ -3,6 +3,7 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>{{ $project->name }}</h1>
+        @can('update', $project)
         <div>
             <a href="{{ route('projects.edit', $project) }}" class="btn btn-warning">Edit</a>
             <form action="{{ route('projects.destroy', $project) }}" method="POST" class="d-inline">
@@ -11,6 +12,7 @@
                 <button class="btn btn-danger">Delete</button>
             </form>
         </div>
+        @endcan
     </div>
 
     <p>{{ $project->description }}</p>

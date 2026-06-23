@@ -4,7 +4,6 @@
     <h1 class="mb-4">Tags</h1>
 
     <div class="row">
-        {{-- Create Tag Form --}}
         <div class="col-md-4">
             <div class="card mb-4">
                 <div class="card-body">
@@ -30,7 +29,6 @@
             </div>
         </div>
 
-        {{-- Tags List --}}
         <div class="col-md-8">
             <div class="d-flex flex-wrap gap-2">
                 @forelse($tags as $tag)

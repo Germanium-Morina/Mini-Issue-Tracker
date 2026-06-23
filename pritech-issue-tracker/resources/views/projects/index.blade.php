@@ -12,12 +12,14 @@
                 <h5 class="card-title">{{ $project->name }}</h5>
                 <p class="card-text">{{ $project->description }}</p>
                 <a href="{{ route('projects.show', $project) }}" class="btn btn-sm btn-info">View</a>
-                <a href="{{ route('projects.edit', $project) }}" class="btn btn-sm btn-warning">Edit</a>
-                <form action="{{ route('projects.destroy', $project) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                </form>
+                @can('update', $project)
+                    <a href="{{ route('projects.edit', $project) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="{{ route('projects.destroy', $project) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                @endcan
             </div>
         </div>
     @empty

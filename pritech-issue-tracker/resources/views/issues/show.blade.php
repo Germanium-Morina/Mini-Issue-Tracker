@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    {{-- Issue Header --}}
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>{{ $issue->title }}</h1>
         <div>
@@ -14,7 +13,6 @@
         </div>
     </div>
 
-    {{-- Issue Details --}}
     <div class="mb-3">
         <span class="badge bg-secondary">{{ $issue->status }}</span>
         <span class="badge bg-info">{{ $issue->priority }}</span>
@@ -28,7 +26,6 @@
 
     <hr>
 
-    {{-- Tags Section --}}
     <h4>Tags</h4>
     <div class="mb-3" id="attached-tag-badges">
         @foreach($issue->tags as $tag)
@@ -39,7 +36,7 @@
     <div class="mb-4">
         <strong>Attach / Detach Tags:</strong><br>
         @php $attachedIds = $issue->tags->pluck('id')->toArray(); @endphp
-        @foreach(\App\Models\Tag::all() as $tag)
+        @foreach($tags as $tag)
             <button
                 class="btn btn-sm me-1 mt-1 tag-toggle {{ in_array($tag->id, $attachedIds) ? 'btn-success' : 'btn-outline-secondary' }}"
                 data-attach-url="{{ route('issues.tags.attach', [$issue, $tag]) }}"
@@ -53,10 +50,33 @@
 
     <hr>
 
-    {{-- Comments Section --}}
+    <h4>Assigned Members</h4>
+    <div class="mb-3" id="assigned-members">
+        @foreach($issue->users as $user)
+            <span class="badge bg-primary me-1" id="badge-user-{{ $user->id }}">{{ $user->name }}</span>
+        @endforeach
+    </div>
+
+    <div class="mb-4">
+        <strong>Assign / Unassign Members:</strong><br>
+        @php $assignedUserIds = $issue->users->pluck('id')->toArray(); @endphp
+        @foreach($users as $user)
+            <button
+                class="btn btn-sm me-1 mt-1 user-toggle {{ in_array($user->id, $assignedUserIds) ? 'btn-primary' : 'btn-outline-secondary' }}"
+                data-assign-url="{{ route('issues.users.assign', [$issue, $user]) }}"
+                data-unassign-url="{{ route('issues.users.unassign', [$issue, $user]) }}"
+                data-assigned="{{ in_array($user->id, $assignedUserIds) ? '1' : '0' }}"
+                data-user-id="{{ $user->id }}"
+                data-user-name="{{ $user->name }}">
+                {{ $user->name }}
+            </button>
+        @endforeach
+    </div>
+
+    <hr>
+
     <h4>Comments</h4>
 
-    {{-- Add Comment Form --}}
     <div class="card mb-4">
         <div class="card-body">
             <h6>Add a Comment</h6>
@@ -82,7 +102,6 @@
     const csrfToken = document.querySelector('meta[name=csrf-token]').content;
     let nextPageUrl = `/issues/${issueId}/comments?page=1`;
 
-    // Load first page on page load
     loadComments();
 
     function loadComments() {
@@ -97,10 +116,8 @@
             });
     }
 
-    // Load more uses next_page_url directly from Laravel
     document.getElementById('load-more').addEventListener('click', loadComments);
 
-    // Submit comment via AJAX
     document.getElementById('submit-comment').addEventListener('click', () => {
         const author_name = document.getElementById('author_name').value;
         const body = document.getElementById('body').value;
@@ -155,7 +172,33 @@
         document.getElementById('comments-list').insertAdjacentHTML('afterbegin', commentHtml(comment));
     }
 
-    // Tag attach/detach
+    document.querySelectorAll('.user-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const assigned = btn.dataset.assigned === '1';
+            const url = assigned ? btn.dataset.unassignUrl : btn.dataset.assignUrl;
+
+            fetch(url, {
+                method: assigned ? 'DELETE' : 'POST',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.dataset.assigned = data.assigned ? '1' : '0';
+                btn.classList.toggle('btn-primary', data.assigned);
+                btn.classList.toggle('btn-outline-secondary', !data.assigned);
+
+                const membersContainer = document.getElementById('assigned-members');
+                if (data.assigned) {
+                    membersContainer.insertAdjacentHTML('beforeend',
+                        `<span class="badge bg-primary me-1" id="badge-user-${data.user.id}">${data.user.name}</span>`);
+                } else {
+                    const badge = document.getElementById(`badge-user-${data.user.id}`);
+                    if (badge) badge.remove();
+                }
+            });
+        });
+    });
+
     document.querySelectorAll('.tag-toggle').forEach(btn => {
         btn.addEventListener('click', () => {
             const attached = btn.dataset.attached === '1';
@@ -171,7 +214,6 @@
                 btn.classList.toggle('btn-success', data.attached);
                 btn.classList.toggle('btn-outline-secondary', !data.attached);
 
-                // Update the tag badges display at the top
                 const badgesContainer = document.getElementById('attached-tag-badges');
                 if (data.attached) {
                     badgesContainer.insertAdjacentHTML('beforeend',

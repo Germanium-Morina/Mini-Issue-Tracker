@@ -20,8 +20,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $alice = User::factory()->create([
+            'name'     => 'Alice',
+            'email'    => 'alice@example.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $bob = User::factory()->create([
+            'name'     => 'Bob',
+            'email'    => 'bob@example.com',
+            'password' => bcrypt('password'),
+        ]);
+
         $tags = Tag::factory(10)->create();
-        Project::factory(4)->create()->each(function ($project) use ($tags) {
+
+        $projects = Project::factory(4)->create(['user_id' => $alice->id])
+            ->merge(Project::factory(4)->create(['user_id' => $bob->id]));
+
+        $projects->each(function ($project) use ($tags) {
             Issue::factory(5)->create(['project_id' => $project->id])->each(function ($issue) use ($tags) {
                 $issue->tags()->attach($tags->random(rand(1, 3))->pluck('id'));
                 Comment::factory(4)->create(['issue_id' => $issue->id]);

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Project extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'description', 'start_date', 'deadline'];
+    protected $fillable = ['name', 'description', 'start_date', 'deadline', 'user_id'];
 
     public function issues()
     {
